@@ -1,30 +1,39 @@
 import pymel.core as pm
-import sys 
+import sys
 
-def createAiUserDataAttr(name, value, type):
-    attrName = name.getText()
-    attrVal = value.getText()
-    attrType = pm.optionMenu(type, query=True, value=True)
-    
-    sys.stdout.write("%s" % attrName)
-    sys.stdout.write("%s" % attrVal)
-    sys.stdout.write("%s" % attrType)
-    
+def createAiUserDataAttr(nameField, valueField, typeField):
+    typeMappings = {
+        "Float": "float",
+        "Integer": "short",
+        "Boolean": "bool",
+        "String": "string",
+    }
+
+    attrName = nameField.getText()
+    attrVal = valueField.getText()
+    rawType = pm.optionMenu(typeField, query=True, value=True)
+
     for node in pm.ls(sl=True):
         shape = node.listRelatives(shapes=True)[0]
         attrFullName = "mtoa_constant_" + attrName
-        if attrType == "Color":
+
+        if rawType == "Color":
             shape.addAttr(attrFullName, keyable=1, attributeType="double3")
             for channel in ["R", "G", "B"]:
                 shape.addAttr(attrFullName + channel, parent=attrFullName, keyable=1, attributeType="double")
-        shape.addAttr(attrFullName, keyable=1, dataType=attrType.lower())
+        else:
+            attrType = typeMappings[rawType]
+            shape.addAttr(attrFullName, keyable=1, attributeType=attrType)
+
         if attrVal:
             shape.attr(attrFullName).set(int(attrVal))
-    
+
+        sys.stdout.write("Added %s to %s\n" % (attrFullName, str(shape)))
+
 windowID = "aiAttrWin"
 if pm.window(windowID, exists=True):
     pm.deleteUI(windowID)
-    
+
 window = pm.window(windowID, title="Add aiUserData Attribute")
 pm.rowColumnLayout(numberOfColumns=2, columnWidth=(2, 300), columnSpacing=[(1, 10), (2, 10)], rowSpacing=(10, 10))
 
@@ -39,7 +48,6 @@ pm.menuItem(label = "Float")
 pm.menuItem(label = "Integer")
 pm.menuItem(label = "Boolean")
 pm.menuItem(label = "String")
-pm.menuItem(label = "Enum")
 
 pm.button(label="Cancel", command="pm.deleteUI('" + window + "', window=True)")
 pm.button(label="Add aiUserData Attribute", command=pm.Callback(createAiUserDataAttr, name, value, type))
