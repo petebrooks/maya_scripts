@@ -1,33 +1,48 @@
 import pymel.core as pm
 import sys
-import fnmatch
 import os
+import fnmatch
 
 class AiPlugSubstance:
-  """TODO: docstring for AiPlugSubstance"""
+  """
+  AiPlugSubstance automatically connects an aiStandardSurface material
+  to textures exported from Substance Painter.
+  """
+
+  VALID_EXTENSIONS = [
+    ".png",
+    ".tif",
+    ".tiff",
+    ".exr",
+    ".hdr",
+    ".tga",
+  ]
+
   def __init__(self):
     try:
       self.ai_material = pm.ls(sl=True, materials=True)[0]
       self.directory = None
       self.filenames = {}
       self.launch_file_browser()
+      self.run()
     except IndexError:
       sys.stdout.write("Select a material")
 
-
   def launch_file_browser(self):
-    pm.fileBrowserDialog(mode=4, # directories mode
-                         fileCommand=self.plug,
-                         fileType="image")
+    directory = pm.fileDialog2(
+      okCaption = "Select",
+      fileMode = 3, # Directory mode
+      dialogStyle = 2, # Maya-style dialog
+      caption = "Select texture directory"
+    )
+    self.directory = directory[0]
 
-  def plug(self, directory, _type):
-    self.directory = directory
+  def run(self):
     self.filenames = {
       "baseColor": self.filename_for_map("BaseColor"),
       "roughness": self.filename_for_map("Roughness"),
       "normal": self.filename_for_map("Normal"),
-      "metalness": self.filename_for_map("Metalness"),
-      "metalness": self.filename_for_map("Metallic"),
+      "metalness": self.filename_for_map("Metalness") or self.filename_for_map("Metallic"),
       "emissive": self.filename_for_map("Emissive"),
       "height": self.filename_for_map("Height"),
     }
@@ -46,9 +61,11 @@ class AiPlugSubstance:
   def search_directory(self, map_type):
     matches = []
     for root, dirnames, filenames in os.walk(self.directory):
-        search_string = "*%s*.png" % map_type
-        for filename in fnmatch.filter(filenames, search_string):
-            matches.append(os.path.join(root, filename))
+      search_string = "*%s*" % map_type
+      for filename in fnmatch.filter(filenames, search_string):
+        _, extension = os.path.splitext(filename)
+        if extension in self.VALID_EXTENSIONS:
+          matches.append(os.path.join(root, filename))
     return matches
 
   def connect(self, attr_1, attr_2):
