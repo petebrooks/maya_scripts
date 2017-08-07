@@ -51,35 +51,39 @@ class AiPlugSubstance:
             matches.append(os.path.join(root, filename))
     return matches
 
+  def connect(self, attr_1, attr_2):
+    pm.connectAttr(attr_1, attr_2, force=True)
+
+  def connect_alpha(self, attr, file_node):
+    file_node.alphaIsLuminance.set(1)
+    self.connect(file_node.outAlpha, self.ai_material.attr(attr))
+
+  def connect_color(self, attr, file_node):
+    self.connect(file_node.outColor, self.ai_material.attr(attr))
+
+  def connect_normal(self, file_node):
+    bump_node = pm.shadingNode("bump2d", asUtility=True)
+    bump_node.bumpInterp.set(1) # Tangent Space Normals
+    self.connect(file_node.outAlpha, bump_node.bumpValue)
+    self.connect(bump_node.outNormal, self.ai_material.normalCamera)
+
   def connect_texture(self, attr, file):
-    file_node = pm.shadingNode("file", name=os.path.basename(file), asTexture=True)
+    file_node = pm.shadingNode(
+                  "file",
+                  name=os.path.basename(file),
+                  asTexture=True
+                )
 
     if attr == "baseColor":
-      file_attr_name = "%s.outColor" % str(file_node)
-      ai_attr_name = "%s.%s" % (self.ai_material, attr)
-      pm.connectAttr(file_attr_name, ai_attr_name, force=True)
+      self.connect_color("baseColor", file_node)
     elif attr == "normal":
-      file_attr_name = "%s.outAlpha" % str(file_node)
-      ai_attr_name = "%s.normalCamera" % self.ai_material
-      bump_node = pm.shadingNode("bump2d", asUtility=True)
-      bump_node.bumpInterp.set(1) # Tangent Space Normals
-      pm.connectAttr(file_attr_name, str(bump_node) + ".bumpValue", force=True)
-      pm.connectAttr(str(bump_node) + ".outNormal", ai_attr_name, force=True)
+      self.connect_normal(file_node)
     elif attr == "roughness":
-      file_attr_name = "%s.outAlpha" % str(file_node)
-      ai_attr_name = "%s.specularRoughness" % self.ai_material
-      file_node.alphaIsLuminance.set(1)
-      pm.connectAttr(file_attr_name, ai_attr_name, force=True)
+      self.connect_alpha("specularRoughness", file_node)
     elif attr == "metalness":
-      file_attr_name = "%s.outAlpha" % str(file_node)
-      ai_attr_name = "%s.metalness" % self.ai_material
-      file_node.alphaIsLuminance.set(1)
-      pm.connectAttr(file_attr_name, ai_attr_name, force=True)
+      self.connect_alpha("metalness", file_node)
     elif attr == "emission":
-      file_attr_name = "%s.outAlpha" % str(file_node)
-      ai_attr_name = "%s.emission" % self.ai_material
-      file_node.alphaIsLuminance.set(1)
-      pm.connectAttr(file_attr_name, ai_attr_name, force=True)
+      self.connect_alpha("emission", file_node)
     # elif attr == "height":
       # TODO
 
