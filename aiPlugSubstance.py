@@ -26,7 +26,7 @@ class AiPlugSubstance:
       self.launch_file_browser()
       self.run()
     except IndexError:
-      sys.stdout.write("Select a material")
+      sys.stdout.write("Select a material\n")
 
   def launch_file_browser(self):
     directory = pm.fileDialog2(
@@ -104,4 +104,4 @@ class AiPlugSubstance:
     # elif attr == "height":
       # TODO
 
-AiPlugSubstance()
+# AiPlugSubstance()

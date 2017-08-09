@@ -1,4 +1,7 @@
-import pymel.core as pm
+# class groupToHiPoly:
+#   """docstring for groupToHiPoly """
+#   def __init__(self, arg):
+#     self.arg = arg
 
 def groupToHiPoly(loPolyGroup, renameGroup=True):
   hiPolyGroupName = toHiPolyName(loPolyGroup)
@@ -41,6 +44,6 @@ def getTransform(shape):
   else:
     return None
 
-loPolyGroup = pm.ls(sl=True, transforms=True)[0]
-print "Working..."
-groupToHiPoly(loPolyGroup)
+# loPolyGroup = pm.ls(sl=True, transforms=True)[0]
+# print "Working..."
+# groupToHiPoly(loPolyGroup)
