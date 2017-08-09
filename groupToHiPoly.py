@@ -1,5 +1,9 @@
 import pymel.core as pm
 
+# Usage:
+# loPolyGroup = pm.ls(sl=True, transforms=True)[0]
+# groupToHiPoly(loPolyGroup)
+
 def groupToHiPoly(loPolyGroup, renameGroup=True):
   hiPolyGroupName = toHiPolyName(loPolyGroup)
 
@@ -40,7 +44,3 @@ def getTransform(shape):
     return parents[0]
   else:
     return None
-
-loPolyGroup = pm.ls(sl=True, transforms=True)[0]
-print "Working..."
-groupToHiPoly(loPolyGroup)
