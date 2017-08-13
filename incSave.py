@@ -3,26 +3,37 @@ import os
 
 
 def incSave(dirName="archive"):
-    path = pm.sceneName()
-    fileName = path.split("/")[-1].partition(".")[0]
-    newFileName = fileName + "_0001" + ".ma"
-    fileFolder = os.path.abspath(os.path.join(path, os.pardir))
-    incSaveFolderPath = os.path.join(fileFolder, dirName)
-    projectSaveFolder = os.path.join(incSaveFolderPath, fileName)
-    incSaveFilePath = os.path.join(projectSaveFolder, newFileName)
+    scenePath = pm.sceneName()
+    sceneName = os.path.basename(scenePath).partition(".")[0]
+    sceneDir = os.path.dirname(scenePath)
+    archiveDir = os.path.join(sceneDir, dirName)
+    num = 1
 
-    if os.path.exists(incSaveFilePath):
-        savedFiles = sorted(os.listdir(projectSaveFolder))
-        incFiles = []
-        for ifl in savedFiles:
-            if fileName in i:
-                incFiles.append(i)
-        lastFile = incFiles[len(incFiles) - 1]
-        name = lastFile.partition(".")[0]
-        newName = name[:-4] + (str(int(name[-4:]) + 1).zfill(4)) + ".ma"
-        incSaveFilePath = os.path.join(projectSaveFolder, newName)
+    if os.path.exists(archiveDir):
+        lastVersion = maxVersion(archiveDir, match=sceneName)
+        num = lastVersion + 1
     else:
-        os.makedirs(projectSaveFolder)
+        os.makedirs(archiveDir)
 
-    pm.system.saveAs(incSaveFilePath)
+    newName = incSceneName(sceneName, num)
+    archiveFilePath = os.path.join(archiveDir, newName)
+
+    pm.system.saveAs(archiveFilePath)
     pm.system.saveAs(path)
+
+    print archiveFilePath
+
+def maxVersion(path, match=""):
+    nums = []
+    for file in os.listdir(path):
+        if match in file:
+            parts = file.split(".")
+            if len(parts) > 2:
+                nums.append(int(parts[-2]))
+    return max(nums)
+
+def incSceneName(name, num):
+    version = str(num).zfill(4)
+    return ".".join([name, version, "ma"])
+
+incSave()

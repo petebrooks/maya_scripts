@@ -1,29 +1,55 @@
+from fnmatch import fnmatch
+
 import pymel.core as pm
 
 # Usage:
 # loPolyGroup = pm.ls(sl=True, transforms=True)[0]
 # groupToHiPoly(loPolyGroup)
+#
+# toHiPolyGroup(pm.selected())
 
-def groupToHiPoly(loPolyGroup, renameGroup=True):
+
+def groupToHiPoly(loPolyGroup,
+                  divisions=1,
+                  exclude=None):
   hiPolyGroupName = toHiPolyName(loPolyGroup)
 
   if len(pm.ls(hiPolyGroupName)):
     pm.delete(hiPolyGroupName)
 
-  hiPolyGroup = pm.group(name=hiPolyGroupName, world=True, empty=True)
+  geoNodes = pm.listRelatives(loPolyGroup, children=True)
+  return toHiPolyGroup(geoNodes,
+                       name=hiPolyGroupName,
+                       divisions=divisions,
+                       exclude=exclude)
 
-  for node in pm.listRelatives(loPolyGroup, children=True):
+def toHiPolyGroup(nodes,
+                  name="hiPoly_Grp_1",
+                  divisions=1,
+                  exclude=None):
+  hiPolyGroup = pm.group(name=name, world=True, empty=True)
+
+  for node in nodes:
     if isPolyMeshTransform(node):
       dup = pm.duplicate(node,
                          name=toHiPolyName(node),
                          returnRootsOnly=True,
-                         upstreamNodes=True)
+                         upstreamNodes=True)[0]
       pm.parent(dup, hiPolyGroup)
-      pm.polySmooth(dup, divisions=3)
+
+      if matchPatterns(dup, "plywood_*") or matchPatterns(dup, "uglyDoor_*"):
+        print dup
+      else:
+        pm.polySmooth(dup, divisions=divisions)
     elif isTransform(node):
       pm.parent(groupToHiPoly(node), hiPolyGroup)
 
   return hiPolyGroup
+
+def matchPatterns(node, pattern):
+  if fnmatch(str(node), pattern):
+    return True
+  return False
 
 def toHiPolyName(loPoly):
   baseName = str(loPoly).replace("_lo", "")
@@ -44,3 +70,7 @@ def getTransform(shape):
     return parents[0]
   else:
     return None
+
+groupToHiPoly(pm.selected()[0], exclude="plywood_*")
+
+# file -force -options "v=0;" -typ "FBX export" -pr -es "/Volumes/Promise Pegasus/maya/projects/realest_estate/scenes/club_moss/substance/clubFloor_hi.fbx";
