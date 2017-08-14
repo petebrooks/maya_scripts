@@ -1,6 +1,6 @@
 import pymel.core as pm
 import os
-
+import sys
 
 def incSave(dirName="archive"):
     scenePath = pm.sceneName()
@@ -19,9 +19,9 @@ def incSave(dirName="archive"):
     archiveFilePath = os.path.join(archiveDir, newName)
 
     pm.system.saveAs(archiveFilePath)
-    pm.system.saveAs(path)
-
-    print archiveFilePath
+    sys.stdout.write("Version saved as %s" % archiveFilePath)
+    pm.system.saveAs(scenePath)
+    sys.stdout.write("Scene saved as %s" % scenePath)
 
 def maxVersion(path, match=""):
     nums = []
