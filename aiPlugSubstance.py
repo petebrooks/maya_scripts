@@ -6,7 +6,8 @@ import fnmatch
 class AiPlugSubstance:
   """
   AiPlugSubstance automatically connects an aiStandardSurface material
-  to textures exported from Substance Painter.
+  to textures exported from Substance Painter. Expects files for one
+  material to be contained in their own directory.
   """
 
   VALID_EXTENSIONS = [
@@ -88,8 +89,10 @@ class AiPlugSubstance:
     file_node = pm.shadingNode(
                   "file",
                   name=os.path.basename(file),
-                  asTexture=True
+                  asTexture=True,
+                  isColorManaged=True,
                 )
+    file_node.fileTextureName.set(file)
 
     if attr == "baseColor":
       self.connect_color("baseColor", file_node)
@@ -101,7 +104,9 @@ class AiPlugSubstance:
       self.connect_alpha("metalness", file_node)
     elif attr == "emission":
       self.connect_alpha("emission", file_node)
+    elif attr == "emissive":
+      self.connect_alpha("emission", file_node)
     # elif attr == "height":
       # TODO
 
-# AiPlugSubstance()
+AiPlugSubstance()
