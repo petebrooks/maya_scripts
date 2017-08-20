@@ -4,7 +4,7 @@ import sys
 
 def incSave(dirName="archive"):
     scenePath = pm.sceneName()
-    sceneName = os.path.basename(scenePath).partition(".")[0]
+    sceneName = getBasename(scenePath)
     sceneDir = os.path.dirname(scenePath)
     archiveDir = os.path.join(sceneDir, dirName)
     num = 1
@@ -19,9 +19,13 @@ def incSave(dirName="archive"):
     archiveFilePath = os.path.join(archiveDir, newName)
 
     pm.system.saveAs(archiveFilePath)
-    sys.stdout.write("Version saved as %s" % archiveFilePath)
+    sys.stdout.write("\nVersion saved as %s" % archiveFilePath)
     pm.system.saveAs(scenePath)
-    sys.stdout.write("Scene saved as %s" % scenePath)
+    sys.stdout.write("\nScene saved as %s" % scenePath)
+
+def getBasename(path):
+    base = os.path.splitext(path)[0]
+    return os.path.basename(base)
 
 def maxVersion(path, match=""):
     nums = []
