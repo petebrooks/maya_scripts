@@ -33,8 +33,15 @@ def maxVersion(path, match=""):
         if match in file:
             parts = file.split(".")
             if len(parts) > 2:
-                nums.append(int(parts[-2]))
-    return max(nums)
+                try:
+                    nums.append(int(parts[-2]))
+                except ValueError:
+                    pass
+
+    if len(nums) > 0:
+        return max(nums)
+    else:
+        return 0
 
 def incSceneName(name, num):
     version = str(num).zfill(4)
