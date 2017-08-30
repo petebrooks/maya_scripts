@@ -8,15 +8,21 @@
 
 import pymel.core as pm
 
-def instanceAndReplace():
+def cloneAndReplace(keepNames=True, instance=False):
   sel = pm.selected()
   source = sel.pop(0)
   for target in sel:
-    instance = pm.instance(source)[0]
-    pm.matchTransform(instance, target)
+    print instance
+    if instance:
+      clone = pm.instance(source)[0]
+    else:
+      clone = pm.duplicate(source)[0]
+    pm.matchTransform(clone, target)
     parent = firstOrNone(pm.listRelatives(target, parent=True))
-    safeParent(instance, parent)
+    safeParent(clone, parent)
     pm.delete(target)
+    if keepNames:
+      pm.rename(clone, target)
 
 def firstOrNone(list):
   try:
@@ -30,4 +36,4 @@ def safeParent(child, prent):
   else:
     pm.parent(child, world=True)
 
-instanceAndReplace()
+cloneAndReplace()
