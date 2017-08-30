@@ -9,13 +9,13 @@
 import pymel.core as pm
 
 def instanceAndReplace():
-  sel = pm.ls(sl=True)
-  source = sel[0]
-  for target in sel[1:len(sel)]:
-    dup = pm.instance(source)
-    pm.matchTransform(dup, target)
+  sel = pm.selected()
+  source = sel.pop(0)
+  for target in sel:
+    instance = pm.instance(source)[0]
+    pm.matchTransform(instance, target)
     parent = firstOrNone(pm.listRelatives(target, parent=True))
-    safeParent(dup, parent)
+    safeParent(instance, parent)
     pm.delete(target)
 
 def firstOrNone(list):
