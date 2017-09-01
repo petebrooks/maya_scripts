@@ -12,7 +12,6 @@ def cloneAndReplace(keepNames=True, instance=False):
   sel = pm.selected()
   source = sel.pop(0)
   for target in sel:
-    print instance
     if instance:
       clone = pm.instance(source)[0]
     else:

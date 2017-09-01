@@ -1,6 +1,6 @@
 from fnmatch import fnmatch
 
-import pymel.core as pm
+# import pymel.core as pm
 
 # Usage:
 # loPolyGroup = pm.ls(sl=True, transforms=True)[0]
@@ -37,9 +37,9 @@ def toHiPolyGroup(nodes,
                          upstreamNodes=True)[0]
       pm.parent(dup, hiPolyGroup)
 
-      if matchPatterns(dup, "plywood_*") or matchPatterns(dup, "uglyDoor_*"):
-        print dup
-      else:
+      print str(node)
+      print str(node).endswith("_lo")
+      if str(node).endswith("_lo"):
         pm.polySmooth(dup, divisions=divisions)
     elif isTransform(node):
       pm.parent(groupToHiPoly(node), hiPolyGroup)
@@ -71,6 +71,8 @@ def getTransform(shape):
   else:
     return None
 
-groupToHiPoly(pm.selected()[0], exclude="plywood_*")
-
 # file -force -options "v=0;" -typ "FBX export" -pr -es "/Volumes/Promise Pegasus/maya/projects/realest_estate/scenes/club_moss/substance/clubFloor_hi.fbx";
+
+# TODO:
+# - Base decision on whether to smooth on arnold subdivision settings
+# - Auto export

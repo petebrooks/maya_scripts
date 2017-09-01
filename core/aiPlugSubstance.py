@@ -45,7 +45,7 @@ class AiPlugSubstance:
       "normal": self.filename_for_map("Normal"),
       "metalness": self.filename_for_map("Metalness") or self.filename_for_map("Metallic"),
       "emissive": self.filename_for_map("Emissive"),
-      "height": self.filename_for_map("Height"),
+      # "height": self.filename_for_map("Height"),
     }
 
     for attr, file in self.filenames.items():
@@ -110,3 +110,10 @@ class AiPlugSubstance:
       # TODO
 
 AiPlugSubstance()
+
+# TODO:
+# - Height
+# - Option to skip maps that are all black/white
+# - Create place2dTexture node (shared between all maps for material)
+# - Perhaps separate function to create place2dTexture node and connect
+#   to selection?
