@@ -1,6 +1,6 @@
 import pymel.core as pm
 
-def create():
+def create(lockAttrs=True):
   cameraName = pm.mel.camera(
     centerOfInterest=5,
     focalLength=35,
@@ -36,23 +36,17 @@ def create():
   transformGroupName = "%s_transform" % str(camera)
   transformGroup = pm.group(camera, up, name=transformGroupName)
 
-  _lockAndHideTransforms(cameraGroup, translate=True, rotate=True, scale=True)
-  _lockAndHide(cameraGroup, "offsetX", "offsetY", "offsetZ", "twist")
-  _lockAndHideTransforms(camera, translate=True, scale=True)
-  _lockAndHideTransforms(transformGroup, rotate=True, scale=True)
-  _lockAndHideTransforms(aim, rotate=True, scale=True)
-  _lockAndHideTransforms(up, rotate=True, scale=True)
-
   camera.displayGateMaskColor.set((0.0, 0.0, 0.0))
   camera.displayGateMaskOpacity.set(1)
+  camera.filmFit.set(1)
+  camera.overscan.set(1.05)
 
-def _lockAndHideTransforms(object, translate=False, rotate=False, scale=False):
-  if translate:
-    _lockAndHide(object, "translateX", "translateY", "translateZ")
-  if rotate:
-    _lockAndHide(object, "rotateX", "rotateY", "rotateZ")
-  if scale:
-    _lockAndHide(object, "scaleX", "scaleY", "scaleZ")
+  if lockAttrs:
+    _lockAndHide(cameraGroup, "translate", "rotate", "scale", "offset", "twist")
+    _lockAndHide(camera, "translate")
+    _lockAndHide(transformGroup, "rotate")
+    _lockAndHide(aim, "rotate")
+    _lockAndHide(up, "rotate")
 
 def _lockAndHide(object, *attr_names):
   for attr_name in attr_names:

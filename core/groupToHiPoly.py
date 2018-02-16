@@ -1,12 +1,14 @@
 from fnmatch import fnmatch
 
-# import pymel.core as pm
+import pymel.core as pm
+import re
 
 # Usage:
 # loPolyGroup = pm.ls(sl=True, transforms=True)[0]
 # groupToHiPoly(loPolyGroup)
 #
 # toHiPolyGroup(pm.selected())
+# groupToHiPoly(pm.selected()[0])
 
 
 def groupToHiPoly(loPolyGroup,
@@ -37,14 +39,15 @@ def toHiPolyGroup(nodes,
                          upstreamNodes=True)[0]
       pm.parent(dup, hiPolyGroup)
 
-      print str(node)
-      print str(node).endswith("_lo")
-      if str(node).endswith("_lo"):
+      if isSmoothed(node):
         pm.polySmooth(dup, divisions=divisions)
     elif isTransform(node):
       pm.parent(groupToHiPoly(node), hiPolyGroup)
 
   return hiPolyGroup
+
+def isSmoothed(mesh):
+  return not not mesh.aiSubdivType.get()
 
 def matchPatterns(node, pattern):
   if fnmatch(str(node), pattern):
@@ -52,8 +55,10 @@ def matchPatterns(node, pattern):
   return False
 
 def toHiPolyName(loPoly):
-  baseName = str(loPoly).replace("_lo", "")
-  return baseName + "_hi"
+  return mesh_basename(loPoly) + "_hi"
+
+def mesh_basename(mesh):
+  return re.match(r"(?:.*\|)?(.+)_(?:Geo|lo).*", str(mesh)).group(1)
 
 def isPolyMeshTransform(node):
   return isTransform(node) and isMesh(node.getShape())
@@ -71,8 +76,14 @@ def getTransform(shape):
   else:
     return None
 
+groupToHiPoly(pm.selected()[0])
+
+# for mesh in pm.selected():
+#   print mesh
+#   print "\t" + toHiPolyName(mesh)
+#   print "\t" + str(isSmoothed(mesh))
+
 # file -force -options "v=0;" -typ "FBX export" -pr -es "/Volumes/Promise Pegasus/maya/projects/realest_estate/scenes/club_moss/substance/clubFloor_hi.fbx";
 
 # TODO:
-# - Base decision on whether to smooth on arnold subdivision settings
 # - Auto export

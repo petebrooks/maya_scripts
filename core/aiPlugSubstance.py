@@ -19,13 +19,13 @@ class AiPlugSubstance:
     ".tga",
   ]
 
-  def __init__(self):
+  def __init__(self, material):
     try:
-      self.ai_material = pm.ls(sl=True, materials=True)[0]
+      self.ai_material = material
       self.directory = None
       self.filenames = {}
-      self.launch_file_browser()
-      self.run()
+      if self.launch_file_browser():
+        self.run()
     except IndexError:
       sys.stdout.write("Select a material\n")
 
@@ -34,9 +34,12 @@ class AiPlugSubstance:
       okCaption = "Select",
       fileMode = 3, # Directory mode
       dialogStyle = 2, # Maya-style dialog
-      caption = "Select texture directory"
+      caption = "Select texture directory for %s" % self.ai_material,
     )
-    self.directory = directory[0]
+    success = directory and len(directory)
+    if success:
+      self.directory = directory[0]
+    return success
 
   def run(self):
     self.filenames = {
@@ -45,7 +48,8 @@ class AiPlugSubstance:
       "normal": self.filename_for_map("Normal"),
       "metalness": self.filename_for_map("Metalness") or self.filename_for_map("Metallic"),
       "emissive": self.filename_for_map("Emissive"),
-      # "height": self.filename_for_map("Height"),
+      "height": self.filename_for_map("Height"),
+      "opacity": self.filename_for_map("Opacity"),
     }
 
     for attr, file in self.filenames.items():
@@ -82,6 +86,8 @@ class AiPlugSubstance:
   def connect_normal(self, file_node):
     bump_node = pm.shadingNode("bump2d", asUtility=True)
     bump_node.bumpInterp.set(1) # Tangent Space Normals
+    bump_node.aiFlipR.set(0) # Disable Flip R channel
+    bump_node.aiFlipG.set(0) # Disable Flip G channel
     self.connect(file_node.outAlpha, bump_node.bumpValue)
     self.connect(bump_node.outNormal, self.ai_material.normalCamera)
 
@@ -96,6 +102,7 @@ class AiPlugSubstance:
 
     if attr == "baseColor":
       self.connect_color("baseColor", file_node)
+      self.ai_material.base.set(1)
     elif attr == "normal":
       self.connect_normal(file_node)
     elif attr == "roughness":
@@ -106,14 +113,27 @@ class AiPlugSubstance:
       self.connect_alpha("emission", file_node)
     elif attr == "emissive":
       self.connect_alpha("emission", file_node)
-    # elif attr == "height":
-      # TODO
-
-AiPlugSubstance()
+    elif attr == "opacity":
+      file_node.alphaIsLuminance.set(1)
+      self.connect(file_node.outAlpha, self.ai_material.attr("opacityR"))
+      self.connect(file_node.outAlpha, self.ai_material.attr("opacityG"))
+      self.connect(file_node.outAlpha, self.ai_material.attr("opacityB"))
+    elif attr == "height":
+      displacement_shader = pm.shadingNode("displacementShader", asShader=True)
+      displacement_shader.scale.set(0)
+      surface_shader = self.ai_material.listConnections(type="shadingEngine")[0]
+      self.connect(
+        file_node.outAlpha,
+        displacement_shader.attr("displacement"),
+      )
+      self.connect(
+        displacement_shader.attr("displacement"),
+        surface_shader.attr("displacementShader"),
+      )
+      file_node.alphaIsLuminance.set(1)
 
 # TODO:
 # - Height
 # - Option to skip maps that are all black/white
 # - Create place2dTexture node (shared between all maps for material)
-# - Perhaps separate function to create place2dTexture node and connect
-#   to selection?
+# - Auto-connect all matching shaders in scene

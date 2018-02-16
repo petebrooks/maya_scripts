@@ -1,7 +1,7 @@
 ##################################################
-# Instance and replace
+# cloneAndReplace
 ##################################################
-# Instance source object for each target object, and replace targets
+# Clone source object for each target object, and replace targets
 # with instances.
 #
 # Select source object, then one or more target objects.
@@ -15,7 +15,7 @@ def cloneAndReplace(keepNames=True, instance=False):
     if instance:
       clone = pm.instance(source)[0]
     else:
-      clone = pm.duplicate(source)[0]
+      clone = pm.duplicate(source, renameChildren=True)[0]
     pm.matchTransform(clone, target)
     parent = firstOrNone(pm.listRelatives(target, parent=True))
     safeParent(clone, parent)
