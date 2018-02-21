@@ -22,6 +22,8 @@ def create(lockAttrs=True):
     horizontalPan=0,
     verticalPan=0,
     zoom=1,
+    displayResolution=1,
+    displayGateMask=1,
   )[0]
   pm.mel.objectMoveCommand()
   pm.mel.cameraMakeNode(3, "")
