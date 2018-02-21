@@ -5,7 +5,12 @@ import sys
 import datetime
 import shutil
 
-def incSave(dirName="archive", promptDescription=True, amend=False, dryRun=False):
+# TODO:
+# - Store version info as JSON for easy parsing
+# - Overwrite last version message on amend
+# - Autofill last version message when prompting on amend
+
+def incSave(dirName="archive", promptMessage=True, amend=False, dryRun=False):
   scenePath = pm.sceneName()
   sceneName = _getBasename(scenePath)
   archiveDir = os.path.join(
@@ -19,8 +24,9 @@ def incSave(dirName="archive", promptDescription=True, amend=False, dryRun=False
     if amend:
       sys.stdout.write("Nothing to amend.")
       return False
-    else:
-      os.makedirs(archiveDir)
+
+  if not os.path.exists(archiveDir):
+    os.makedirs(archiveDir)
 
   if amend:
     currentVersion = lastVersion
@@ -32,8 +38,8 @@ def incSave(dirName="archive", promptDescription=True, amend=False, dryRun=False
     _versionName(sceneName, currentVersion),
   )
 
-  if promptDescription:
-    _writeUserDescription(
+  if promptMessage:
+    _writeUserMessage(
       archiveDir,
       sceneName,
       currentVersion,
@@ -52,7 +58,7 @@ def _saveVersion(scenePath, archiveFilePath, dryRun=False):
     shutil.copy2(scenePath, archiveFilePath)
     sys.stdout.write("\nVersion saved as %s" % archiveFilePath)
 
-def _descriptionFilePath(archiveDir, sceneName):
+def _indexFilePath(archiveDir, sceneName):
   return os.path.join(archiveDir, sceneName + "--list.txt")
 
 def _getBasename(path):
@@ -82,24 +88,24 @@ def _versionName(name, num):
   version = str(num).zfill(4)
   return ".".join([name, version, "ma"])
 
-def _writeUserDescription(archiveDir, sceneName, version, scenePath):
-  path = _descriptionFilePath(archiveDir, sceneName)
-  description = _getUserDescription()
+def _writeUserMessage(archiveDir, sceneName, version, scenePath):
+  path = _indexFilePath(archiveDir, sceneName)
+  message = _getUserMessage()
   today = datetime.datetime.now()
 
-  with open(path, "a") as descriptionFile:
-    descriptionFile.write("---------------------\n")
-    descriptionFile.write(sceneName + "\n")
-    descriptionFile.write(today.strftime("%d-%b-%Y %I:%M:%S") + "\n")
-    descriptionFile.write("Version %s\n" % version)
-    descriptionFile.write(scenePath + "\n")
-    descriptionFile.write(description + "\n")
+  with open(path, "a") as indexFile:
+    indexFile.write("---------------------\n")
+    indexFile.write(sceneName + "\n")
+    indexFile.write(today.strftime("%d-%b-%Y %I:%M:%S") + "\n")
+    indexFile.write("Version %s\n" % version)
+    indexFile.write(scenePath + "\n")
+    indexFile.write(message + "\n")
 
-def _getUserDescription(text=""):
+def _getUserMessage(text=""):
   result = cmds.promptDialog(
     title="Commit Version",
     text=text,
-    message="Enter description:",
+    message="Enter message:",
     button=["OK", "Cancel"],
     defaultButton="OK",
     cancelButton="Cancel",
@@ -109,4 +115,4 @@ def _getUserDescription(text=""):
   if result == "OK":
     return pm.promptDialog(query=True, text=True)
   else:
-    return "No description"
+    return "No message"
