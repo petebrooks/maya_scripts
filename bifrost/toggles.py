@@ -20,6 +20,9 @@ def enable(bifrostObjects=None):
     _toggle(object, True)
 
 def _toggle(bifrostObject, newState=None):
+  if _isGroup(bifrostObject):
+    bifrostObject = _findRelativesByName(bifrostObject, "bifrostLiquid")[0]
+
   container = _findRelativesByName(bifrostObject, "bifrostLiquidContainer")[0]
   liquidProps = _findConnectionsByName(container, "bifrostLiquidProperties")
   foamProps = _findConnectionsByName(container, "bifrostFoamProperties")
@@ -46,3 +49,9 @@ def _findRelativesByName(source, name):
 
 def _findConnectionsByName(source, name):
   return filter(lambda object: name in str(object), source.listConnections())
+
+def _isGroup(node):
+  return _isTransform(node) and not node.getShape()
+
+def _isTransform(node):
+  return node and node.nodeType() == "transform"

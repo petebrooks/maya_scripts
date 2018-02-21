@@ -1,3 +1,3 @@
-from .toggle import (toggle,
-                     enable,
-                     disable)
+from .toggles import (toggle,
+                      enable,
+                      disable)
