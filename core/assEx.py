@@ -8,20 +8,25 @@ def create_procedural(path_to_ass):
   fbx_path = os.path.join(dirname, base_name + ".fbx")
   obj_path = os.path.join(dirname, base_name + ".obj")
 
-  geo_node = _import_if_exists(obj_path) or _import_if_exists(fbx_path)
+  geo_node = _import_if_exists(fbx_path) or _import_if_exists(obj_path)
 
   if geo_node:
     pm.rename(geo_node, base_name)
     geo_node.aiTranslator.set("procedural")
     geo_node.dso.set(path_to_ass)
   else:
-    print "No preview found for %s" % base_name
+    print "No proxy found for %s" % base_name
 
 def import_procedurals():
   files = _prompt_files("Select ASS files to import")
   for file in files:
     print "Importing " + file
     create_procedural(file)
+
+# def createStandIns():
+#   files = _prompt_files("Select ASS files to import")
+#   for file in files:
+#     print "Creating stand-in " + file
 
 def export_selected():
   export_dir = _prompt_directory("Select export directory")
@@ -34,13 +39,11 @@ def export(mesh, export_dir=""):
 
   ass_export_path = os.path.join(export_dir, base_name + ".ass")
   fbx_export_path = os.path.join(export_dir, base_name + ".fbx")
-  obj_export_path = os.path.join(export_dir, base_name + ".obj")
 
   _export_ass(mesh, ass_export_path)
   print "Exported %s to %s" % (mesh, ass_export_path)
-  # _export_fbx(mesh, fbx_export_path)
-  _export_obj(mesh, obj_export_path)
-  print "Exported %s to %s" % (mesh, obj_export_path)
+  _export_fbx(mesh, fbx_export_path)
+  print "Exported %s to %s" % (mesh, fbx_export_path)
 
 def _export_ass(mesh, path):
   pm.select(mesh)
@@ -92,6 +95,3 @@ def _prompt_files(caption="Select one or more files"):
     caption = caption
   )
   return dialog
-
-# export_selected()
-# import_procedurals()
