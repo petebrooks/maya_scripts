@@ -1,1 +1,2 @@
-import bendy
+import bend
+import squashAndBend
