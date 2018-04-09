@@ -1,5 +1,6 @@
 import pymel.core as pm
 import maya.cmds as cmds
+from mine.bifrost.properties import *
 import sys
 
 def _enableBifrost(bifrost):
@@ -46,9 +47,10 @@ def _checkBoxToggle(bifrostNode):
   )
 
 def _cacheOptionMenu(bifrostNode):
+  properties = Properties(bifrostNode)
   menu = pm.optionMenu(
     label="Cache",
-    changeCommand=pm.CallbackWithArgs(_setCacheState, bifrostNode),
+    changeCommand=pm.CallbackWithArgs(_setCacheMode, properties),
   )
   options = [
     "Off",
@@ -62,7 +64,7 @@ def _cacheOptionMenu(bifrostNode):
   pm.optionMenu(
     menu,
     edit=True,
-    select=options.index(_getCacheState(bifrostNode)) + 1,
+    select=options.index(_getCacheMode(properties)) + 1,
   )
 
 def _editorRow(bifrostNode):
@@ -83,49 +85,16 @@ def _editorFrame(bifrostContainer):
       for node in _toggleableBifrostNodes(bifrostContainer):
         _editorRow(node)
 
-def _hasAttribute(node, attrName):
-  return pm.attributeQuery(attrName, node=node, exists=True)
-
-def _getCacheState(bifrostNode):
-  intValueMappings = {
-    0: "Re-compute",
-    1: "Read",
-    2: "Write",
-    3: "Read/Write",
-  }
-  possibleCaches = [
-    "liquidCache",
-    "solidCache",
-    "foamCache",
-  ]
-  for cache in possibleCaches:
-    if _hasAttribute(bifrostNode, _enableCacheAttrName(cache)):
-      if bifrostNode.attr(_enableCacheAttrName(cache)).get():
-        cacheAttr = cache + "Control"
-        return intValueMappings[bifrostNode.attr(cacheAttr).get()]
-  return "Off"
-
-def _upcaseFirst(s):
-  if len(s) == 0:
-    return s
+def _getCacheMode(properties):
+  if any(cache.enabled for cache in properties.caches):
+    return properties.caches[0].mode
   else:
-    return s[0].upper() + s[1:]
+    return "Off"
 
-def _enableCacheAttrName(cacheType):
-  return "enable" + _upcaseFirst(cacheType)
-
-def _setCacheState(bifrostNode, value):
-  valueIntMappings = {
-    "Re-compute": 0,
-    "Read": 1,
-    "Write": 2,
-    "Read/Write": 3,
-  }
-  if value == "Off":
-    bifrostNode.enableLiquidCache.set(False)
-  else:
-    bifrostNode.enableLiquidCache.set(True)
-    bifrostNode.liquidCacheControl.set(valueIntMappings[value])
+def _setCacheMode(properties, mode):
+  print properties.caches
+  for cache in properties.caches:
+    cache.setMode(mode)
 
 def run():
   bifrostContainers = pm.ls("bifrostLiquidContainer*")
