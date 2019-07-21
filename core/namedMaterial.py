@@ -1,14 +1,17 @@
 import pymel.core as pm
 import re
 
-def assign_named_material(meshes=pm.selected(), shaderType="aiStandardSurface"):
+def assign(meshes=None, shaderType="aiStandardSurface"):
+  meshes = meshes or pm.selected()
   for mesh in meshes:
-    shader = find_or_create_named_material(mesh, shaderType="aiStandardSurface")
+    print mesh
+    shader = _findOrCreate(mesh, shaderType=shaderType)
+    print shader
     pm.select(mesh)
     pm.hyperShade(assign=shader)
 
-def find_or_create_named_material(mesh, shaderType="aiStandardSurface"):
-  name = to_material_name(mesh)
+def _findOrCreate(mesh, shaderType="aiStandardSurface"):
+  name = _toMaterialName(mesh)
   matching_materials = pm.ls(name)
 
   if len(matching_materials):
@@ -18,12 +21,12 @@ def find_or_create_named_material(mesh, shaderType="aiStandardSurface"):
                         asShader=True,
                         name=name)
 
-def to_material_name(mesh):
-  base_name = mesh_basename(mesh)
+def _toMaterialName(mesh):
+  base_name = _meshBasename(mesh)
   return base_name + "_Mat"
 
-def mesh_basename(node):
-  matches = re.match(r"(.+?)_(?:hi|lo)", str(node))
+def _meshBasename(node):
+  matches = re.match(r"(.+?)_(?:hi|lo|mesh)", str(node))
   if matches:
     return matches.group(1)
   return str(node)
