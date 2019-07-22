@@ -6,12 +6,18 @@ import maya.cmds as cmds
 import os
 import sys
 
+# Export selected nodes for substance Painter.
+# Creates two FBX files, one hi-poly and one lo-poly.
+# Smooths any meshes that have subdivisions enabled in Arnold or Redshift.
+# TODO:
+# - Catch error and delete temp nodes
 def exportForPainter(nodesOrSet):
   if isinstance(nodesOrSet, pm.nodetypes.ObjectSet):
     nodes = nodesOrSet.members()
   else:
     nodes = nodesOrSet
-  sys.stdout.write("%i nodes" % len(nodes))
+
+  sys.stdout.write("%i nodes selected" % len(nodes))
 
   exportName = _getExportName()
   if not exportName:
@@ -31,7 +37,7 @@ def exportForPainter(nodesOrSet):
                                   divisions=2)
   hiPolyNodes = dupAndSmoothNodes(nodes,
                                   suffix="_hi",
-                                  divisions=3)
+                                  divisions=4)
 
   _exportFbx(loPolyNodes, loExportPath)
   sys.stdout.write("Exported lo poly group to: %s" % loExportPath)
@@ -110,7 +116,11 @@ def dupAndSmoothNodes(nodes,
   return smoothNodes
 
 def _isSmoothed(mesh):
-  return mesh.aiSubdivType.get() != 0
+  shape = mesh.getShape()
+  if util.attr.exists(shape, "rsEnableSubdivision"):
+    return shape.rsEnableSubdivision.get() != 0
+  elif util.attr.exists(shape, "aiSubdivType"):
+    return shape.aiSubdivType.get() != 0
 
 def _matchPatterns(node, pattern):
   if fnmatch(str(node), pattern):
