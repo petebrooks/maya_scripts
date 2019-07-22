@@ -47,56 +47,6 @@ def exportForPainter(nodesOrSet):
   sys.stdout.write("Exported hi poly group to: %s" % hiExportPath)
   pm.delete(hiPolyNodes)
 
-  def exportOldWorkflow(lo_poly_group):
-    directory = _promptForDirectory()
-    base_name = _groupBasename(lo_poly_group)
-    base_path = os.path.join(directory, base_name)
-
-    loPolyName = base_path + "_lo.fbx"
-    _exportFbx(lo_poly_group, loPolyName)
-    print "Exported lo poly group to %s" % loPolyName
-
-    hiPolyGroup = groupToHiPoly(lo_poly_group)
-    hiPolyName = base_path + "_hi.fbx"
-    _exportFbx(hiPolyGroup, hiPolyName)
-    pm.delete(hiPolyGroup)
-    print "Exported hi poly group to %s" % hiPolyName
-
-def groupToHiPoly(loPolyGroup,
-                  divisions=1,
-                  exclude=None):
-  hiPolyGroupName = _toHiPolyName(loPolyGroup)
-
-  if len(pm.ls(hiPolyGroupName)):
-    pm.delete(hiPolyGroupName)
-
-  geoNodes = pm.listRelatives(loPolyGroup, children=True)
-  return toHiPolyGroup(geoNodes,
-                       name=hiPolyGroupName,
-                       divisions=divisions,
-                       exclude=exclude)
-
-def toHiPolyGroup(nodes,
-                  name="hiPoly_Grp_1",
-                  divisions=1,
-                  exclude=None):
-  hiPolyGroup = pm.group(name=name, world=True, empty=True)
-
-  for node in nodes:
-    if _isPolyMeshTransform(node):
-      dup = pm.duplicate(node,
-                         name=_toHiPolyName(node),
-                         returnRootsOnly=True,
-                         upstreamNodes=True)[0]
-      pm.parent(dup, hiPolyGroup)
-
-      if _isSmoothed(node):
-        pm.polySmooth(dup, divisions=divisions)
-    elif _isTransform(node):
-      pm.parent(groupToHiPoly(node), hiPolyGroup)
-
-  return hiPolyGroup
-
 def dupAndSmoothNodes(nodes,
                       suffix="",
                       groupName="smoothed_group_1",
