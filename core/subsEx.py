@@ -11,7 +11,7 @@ import sys
 # Smooths any meshes that have subdivisions enabled in Arnold or Redshift.
 # TODO:
 # - Catch error and delete temp nodes
-def exportForPainter(nodesOrSet):
+def exportForPainter(nodesOrSet, lo=True, hi=True):
   if isinstance(nodesOrSet, pm.nodetypes.ObjectSet):
     nodes = nodesOrSet.members()
   else:
@@ -29,20 +29,25 @@ def exportForPainter(nodesOrSet):
     sys.stdout.write("Aborting due to empty directory.")
     return False
 
-  loExportPath = os.path.join(directory, exportName + "_lo.fbx")
-  hiExportPath = os.path.join(directory, exportName + "_hi.fbx")
+  if lo:
+    _exportLoPoly(nodes, exportName, directory)
+  if hi:
+    _exportHiPoly(nodes, exportName, directory)
 
+def _exportLoPoly(nodes, exportName, directory):
+  loExportPath = os.path.join(directory, exportName + "_lo.fbx")
   loPolyNodes = dupAndSmoothNodes(nodes,
                                   suffix="_lo",
                                   divisions=2)
-  hiPolyNodes = dupAndSmoothNodes(nodes,
-                                  suffix="_hi",
-                                  divisions=4)
-
   _exportFbx(loPolyNodes, loExportPath)
   sys.stdout.write("Exported lo poly group to: %s" % loExportPath)
   pm.delete(loPolyNodes)
 
+def _exportHiPoly(nodes, exportName, directory):
+  hiExportPath = os.path.join(directory, exportName + "_hi.fbx")
+  hiPolyNodes = dupAndSmoothNodes(nodes,
+                                  suffix="_hi",
+                                  divisions=4)
   _exportFbx(hiPolyNodes, hiExportPath)
   sys.stdout.write("Exported hi poly group to: %s" % hiExportPath)
   pm.delete(hiPolyNodes)
