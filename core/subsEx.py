@@ -65,7 +65,29 @@ def dupAndSmoothNodes(nodes,
                          returnRootsOnly=True,
                          upstreamNodes=True)[0]
       if _isSmoothed(node):
-        pm.polySmooth(dup, divisions=divisions)
+        pm.delete(dup, constructionHistory=True)
+        pm.polySmooth(dup,
+                      constructionHistory=False,
+                      continuity=1,
+                      divisions=divisions,
+                      divisionsPerEdge=1,
+                      keepBorder=True,
+                      keepHardEdge=False,
+                      keepMapBorders=True,
+                      keepSelectionBorder=True,
+                      keepTessellation=True,
+                      method=0, # Exponential
+                      osdCreaseMethod=0,
+                      osdFvarBoundary=3,
+                      osdFvarPropagateCorners=False,
+                      osdSmoothTriangles=False,
+                      osdVertBoundary=1,
+                      propagateEdgeHardness=False,
+                      pushStrength=0.1,
+                      roundness=1,
+                      subdivisionLevels=1,
+                      subdivisionType=1, # OpenSubdiv Catmull-Clark
+                      smoothUVs=True)
       smoothNodes.append(dup)
 
   return smoothNodes
