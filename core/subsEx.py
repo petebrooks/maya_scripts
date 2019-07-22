@@ -12,6 +12,10 @@ import sys
 # TODO:
 # - Catch error and delete temp nodes
 def exportForPainter(nodesOrSet, lo=True, hi=True):
+  with util.disableUndo():
+    _exportForPainter(nodesOrSet, lo, hi)
+
+def _exportForPainter(nodesOrSet, lo=True, hi=True):
   if isinstance(nodesOrSet, pm.nodetypes.ObjectSet):
     nodes = nodesOrSet.members()
   else:
