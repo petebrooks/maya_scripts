@@ -1,7 +1,9 @@
 import pymel.core as pm
+import maya.cmds as cmds
 
-def create(lockAttrs=True):
+def create(name="camera1", lockAttrs=True):
   cameraName = pm.mel.camera(
+    name=name,
     centerOfInterest=5,
     focalLength=35,
     lensSqueezeRatio=1,
@@ -49,6 +51,35 @@ def create(lockAttrs=True):
     _lockAndHide(transformGroup, "rotate")
     _lockAndHide(aim, "rotate")
     _lockAndHide(up, "rotate")
+
+  result = {
+    "camera": camera,
+    "transform": transformGroup,
+    "aim": aim,
+    "up": up,
+  }
+  return result
+
+def createFromView():
+  cameraResult = create()
+  cameraView = cmds.cameraView(camera=_currentCameraName())
+
+  _matchTransform(cameraResult["transform"], _currentCameraName())
+  return cameraResult
+
+def _matchTransform(target, source):
+  print _toTransform(target)
+  print _toTransform(source)
+  pm.matchTransform(_toTransform(target), _toTransform(source))
+
+def _toTransform(object):
+  if object.nodeType() == "transform":
+    return object
+  return pm.listRelatives(object, type="transform", parent=True)[0]
+
+def _currentCameraName():
+  panel = pm.getPanel(withFocus=True)
+  return pm.windows.modelPanel(panel, query=True, camera=True)
 
 def _lockAndHide(object, *attr_names):
   for attr_name in attr_names:
