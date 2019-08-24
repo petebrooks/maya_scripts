@@ -1,25 +1,25 @@
 import pymel.core as pm
 
 def grandparent(mesh):
-  parent = find_parent(mesh)
-  grandparent = find_parent(parent)
+  parent = _findParent(mesh)
+  grandparent = _findParent(parent)
 
   if grandparent:
     pm.parent(mesh, grandparent)
   else:
     pm.parent(mesh, world=True)
 
-  if is_group(parent) and is_empty(parent):
+  if _isGroup(parent) and _isEmpty(parent):
     pm.delete(parent)
 
-def find_parent(node):
+def _findParent(node):
   return node and node.listRelatives(parent=True)[0]
 
-def is_group(node):
-  return is_transform(node) and not node.getShape()
+def _isGroup(node):
+  return _isTransform(node) and not node.getShape()
 
-def is_transform(node):
+def _isTransform(node):
   return node and node.nodeType() == "transform"
 
-def is_empty(node):
+def _isEmpty(node):
   return not len(node.listRelatives(children=True))
