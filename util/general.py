@@ -33,14 +33,17 @@ def openSceneDir():
     sceneDir(),
   ])
 
-def selectMaterials(objects):
-  materials = []
-  for object in objects:
-    for material in listMaterials(object):
-      if not str(material).startswith("displacementShader"):
-        materials.append(material)
-  pm.select(list(set(materials)))
-  return materials
-
 def switchPosition(object1, object2):
   pass # TODO
+
+def getTransform(node):
+  if _isTransform(node):
+    return node
+  transforms = pm.listRelatives(node, parent=True, type="transform")
+  if len(transforms):
+    return transforms[0]
+  else:
+    return None
+
+def _isTransform(node):
+  return node and node.nodeType() == "transform"
