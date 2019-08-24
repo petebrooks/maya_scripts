@@ -201,7 +201,8 @@ def assignToNewShader(oldShd, newShd):
     if shdGroup:
         if replaceShaders:
             cmds.connectAttr(newShd + '.outColor', shdGroup[0] + '.surfaceShader', force=True)
-            cmds.delete(oldShd)
+            if not str(oldShd) == 'lambert1':
+                cmds.delete(oldShd)
         else:
             cmds.connectAttr(newShd + '.outColor', shdGroup[0] + '.aiSurfaceShader', force=True)
         retVal =True
