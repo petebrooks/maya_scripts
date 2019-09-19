@@ -15,6 +15,6 @@ def mesh_basename(mesh):
 def fixFBXNames(meshes=None):
   meshes = meshes or pm.selected()
   for mesh in meshes:
-    newName = re.match(r"(.+?)FBX.*", str(mesh)).group(1)
+    newName = str(mesh).replace("FBXASC032", "_")
     print "Renaming %s to %s" % (mesh, newName)
     pm.rename(mesh, newName)
