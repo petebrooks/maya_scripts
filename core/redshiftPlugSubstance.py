@@ -29,8 +29,6 @@ class RedshiftPlugSubstance:
       self.filenames = {}
       if self.launchFileBrowser():
         self.connectDirectory()
-    except IndexError:
-      sys.stdout.write("Select a material\n")
 
   def launchFileBrowser(self):
     directory = pm.fileDialog2(
@@ -48,17 +46,19 @@ class RedshiftPlugSubstance:
     for root, _, filenames in os.walk(self.directory):
       for filename in filenames:
         name, extension = os.path.splitext(filename)
-        mapType = self.parseMapType(name)
+        mapType, udim = self.parseFileName(name)
         if mapType and extension in self.VALID_EXTENSIONS:
           fullPath = os.path.join(root, filename)
           self.connectTexture(fullPath, mapType)
         else:
           util.log("Skipping invalid file %s" % filename)
 
-  def parseMapType(self, name):
+  def parseFileName(self, filename):
+    name = filename.split(".")[0]
+    udim = filename.split(".")[1]
     matches = re.match(r"(?:.+)_(.+)", name)
-    if matches:
-      return matches.group(1)
+    mapType = matches.group(1) if matches else None
+    return [mapType, udim]
 
   def connectTexture(self, path, mapType):
     try:
@@ -98,6 +98,9 @@ class RedshiftPlugSubstance:
   def connectDiffuse(self, fileNode):
     self.connectColor("diffuse_color", fileNode)
 
+  def connectBaseColor(self, fileNode):
+    self.connectDiffuse(fileNode)
+
   def connectRoughness(self, fileNode):
     self.connectAlpha("refl_roughness", fileNode)
 
@@ -111,6 +114,10 @@ class RedshiftPlugSubstance:
 
   def connectOpacity(self, fileNode):
     self.connectColor("opacity_color", fileNode)
+
+  def connectMetalness(self, fileNode):
+    self.shader.refl_fresnel_mode.set(2) # Metalness fresnel type
+    self.connectAlpha("refl_metalness", fileNode)
 
   def connectHeight(self, fileNode):
     displacementShader = pm.shadingNode("displacementShader", asShader=True)
