@@ -116,5 +116,3 @@ def run():
         _editorFrame(bifrost)
 
   mainWindow.show()
-
-run()

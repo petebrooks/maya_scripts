@@ -1,4 +1,5 @@
 import pymel.core as pm
+import maya.mel as mel
 import sys
 
 def toggle(bifrostObjects=None):
@@ -55,6 +56,9 @@ def _toggle(bifrostObject, newState=None, toggleAll=False):
 
   if newState == None:
     newState = not container.enable.get()
+
+  if newState == True:
+    mel.eval("playButtonStart")
 
   container.enable.set(newState)
 
