@@ -101,14 +101,14 @@ class Properties():
     attrs = pm.listAttr(self.node)
     if "enableFoamCache" in attrs:
       self._caches.append(Cache("foam", self.node))
-    if "enableFoamInitialState" in attrs:
-      self._caches.append(InitialStateCache("foam", self.node))
+    # if "enableFoamInitialState" in attrs:
+      # self._caches.append(InitialStateCache("foam", self.node))
     if "enableSolidCache" in attrs:
       self._caches.append(Cache("solid", self.node))
     if "enableLiquidCache" in attrs:
       self._caches.append(Cache("liquid", self.node))
     if "enableLiquidMeshCache" in attrs:
       self._caches.append(Cache("liquidMesh", self.node))
-    if "enableLiquidInitialState" in attrs:
-      self._caches.append(InitialStateCache("liquid", self.node))
+    # if "enableLiquidInitialState" in attrs:
+      # self._caches.append(InitialStateCache("liquid", self.node))
     return self._caches
