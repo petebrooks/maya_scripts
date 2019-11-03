@@ -1,7 +1,9 @@
+import alembic
 import core
 import util
 import camera
 import file
 import bifrost
 import rig
-import curve
+# Re-enable once numpy installed
+# import curve
