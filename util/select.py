@@ -1,4 +1,5 @@
 import pymel.core as pm
+from ..util import general
 
 def children(objects=None):
   objects = objects or pm.selected()
@@ -7,10 +8,11 @@ def children(objects=None):
     children.append(pm.listRelatives(obj, children=True))
   pm.select(children)
 
-def materials(objects):
+def materials(objects=None):
+  objects = objects or pm.selected()
   materials = []
   for object in objects:
-    for material in listMaterials(object):
+    for material in general.listMaterials(object):
       if not str(material).startswith("displacementShader"):
         materials.append(material)
   pm.select(list(set(materials)))
