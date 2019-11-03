@@ -47,3 +47,6 @@ def getTransform(node):
 
 def _isTransform(node):
   return node and node.nodeType() == "transform"
+
+def wrapList(val):
+  return val if isinstance(val, list) else [val]

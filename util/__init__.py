@@ -4,7 +4,8 @@ from general import (safeParent,
                       sceneName,
                       sceneDir,
                       openSceneDir,
-                      getTransform)
+                      getTransform,
+                      wrapList)
 import select
 import attr
 from undo import disableUndo
