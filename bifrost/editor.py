@@ -25,6 +25,7 @@ def _isCacheableBifrostNode(node):
   substrings = [
     "LiquidProperties",
     "FoamProperties",
+    "GuideProperties",
   ]
   return any(substring in str(node) for substring in substrings)
 
