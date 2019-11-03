@@ -44,6 +44,7 @@ def create(name="camera1", lockAttrs=True):
   camera.displayGateMaskOpacity.set(1)
   camera.filmFit.set(1)
   camera.overscan.set(1.05)
+  camera.setLockTransform(True) # Equivalent to MEL `camera -e -lockTransform 1 camera1Shape1`
 
   if lockAttrs:
     _lockAndHide(cameraGroup, "translate", "rotate", "scale", "offset", "twist")
@@ -87,3 +88,13 @@ def _lockAndHide(object, *attr_names):
     attr.lock()
     attr.setKeyable(False)
     attr.showInChannelBox(False)
+
+# def _createDOFRig():
+  # distanceDimension -sp 19.219313 0 58.041905 -ep 0.464048 0 -4.813578 ;
+  # parent new locators and distance to camera grp
+  # parent constrain locator1 to camera
+  # parentConstraint -weight 1;
+  # connectAttr -f distanceDimensionShape1.distance cameraShape1.aiFocusDistance;
+  # setAttr "cameraShape1.aiEnableDOF" 1;
+  # _lockAndHide(locator1, "translate", "rotate")
+  # _lockAndHide(locator2, "rotate")
