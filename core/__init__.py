@@ -9,6 +9,9 @@ import namedMaterial
 import transform
 import clone
 import regnamer
+import fbx
+import prompt
+
 from aiPlugSubstance import AiPlugSubstance
 from redshiftPlugSubstance import RedshiftPlugSubstance
 from planeImage import createPlaneImage
